@@ -1,0 +1,5 @@
+name: azure-ml-workshop
+dependencies:
+- pip
+- python=3.7
+- pylint
