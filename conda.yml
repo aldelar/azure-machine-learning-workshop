@@ -1,4 +1,4 @@
-name: azure-ml-workshop
+name: azure-machine-learning-workshop
 dependencies:
 - pip
 - python=3.7
