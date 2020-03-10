@@ -1,4 +1,4 @@
-# azure-ml-workshop
+# azure-machine-learning-workshop
 
 A workshop leveraring Azure Machine Learning
 
