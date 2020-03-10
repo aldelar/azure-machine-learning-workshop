@@ -24,8 +24,8 @@ Create all resources below in the same selection region of your choice. The name
 
 4) Create a "Resource Group" unless your Azure administrator already created one for you, in that case skip to step #5, but read NOTE (*) below
 
-    Name:       prx-azure-ml-workshop
-    Location:   region selected in step #3
+        Name:       prx-azure-ml-workshop
+        Location:   region selected in step #3
     
     Region will not be specified in all instructions below, always set to it to the region you selected in step #3. This is sometimes automatically set if you create a new resource from within your resource group (it will try to default to your resource group's region).
 
@@ -37,18 +37,18 @@ Make sure that all resources below are created within your Resource Group (there
 
 5) Create an Azure "Machine Learning" Workspace
 
-    Workspace Name:     prx-mlws
-    Workspace Edition:  Enterprise
+        Workspace Name:     prx-mlws
+        Workspace Edition:  Enterprise
 
 6) Create an instance of Azure "Cognitive Services"
 
-    Name:           prx-cs
-    Pricing Tier:   S0
+        Name:           prx-cs
+        Pricing Tier:   S0
 
 7) Create an Azure "Form Recognizer"
 
-    Name:           prx-fr
-    Pricing Tier:   S0
+        Name:           prx-fr
+        Pricing Tier:   S0
 
 8) Get into your Machine Learning workspace instance (created at step #5) and click on 'Launch Now' in the information box in the ML workspace panel.
 
