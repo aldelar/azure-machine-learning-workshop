@@ -107,6 +107,7 @@ This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving 
 
 They are 3 Types of experiences to Author ML in Azure ML Studio: Automated ML, Designer, and Notebooks. We will go thru each of them to understand their modes of operations. They all leverage the same underlying Azure ML concepts of Datastores, Datasets, Experimennts, Runs, Compute, etc. but just represent 3 ways to develop Machine Learning models covering the full spectrum from No-Code to Code-Only.
 
+# AUTOMATED ML
 A) Automated ML: trains and finds the best model based on your data without writing a single line of code
 
 We will create an Automated ML experiment to automatically train and find the best model to predict loan approvals based on applicants demographics.
@@ -159,8 +160,8 @@ You can also go to the 'Compute' section, click on the 'cpu-cluster' and you'll 
 
 As soon as a model completes under this Auto ML experiment, click on it to see its results, including its 'Visualizations' which will help you understand its performance.
 
+# DESIGNER
 B) Designer: enables you to build Azure ML pipelines in a full Drag and Drop environment. This can be used for data preparation to generate training data sets, or end to end to train models.
 
-    B.1) 
-
+# NOTEBOOKS
 C) Notebooks
