@@ -105,8 +105,62 @@ This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving 
 
 # AZURE ML STUDIO WALK THRU USING SAMPLES
 
+They are 3 Types of experiences to Author ML in Azure ML Studio.
 
+A) Automated ML: trains and finds the best model based on your data without writing a single line of code
 
-# USE CASE #1: time series forecast --- Auto ML
+    We will create an Automated ML experiment to automatically train and find the best model to predict loan approvals based on applicants demographics.
 
-# USE CASE #2: classification/clustering of time series data  --- 
+    A.1) Click on Datasets in the left side menu, and then Create Dataset 'from web file'
+
+        Web URL:    https://automlsamplenotebookdata.blob.core.windows.net/automl-sample-notebook-data/bankmarketing_train.csv
+        Name:       bank-marketing-training
+
+    A.2) On the next screen, keep all defaults except:
+
+        Column headers:     All files have same headers
+
+        Have a quick look at the data to note that features in the training data set and the 'y' column which we are going to try to predict.
+
+    A.3) On the next screen, keep all defaults which should have auto-discovered the data types
+
+    A.4) On the 'Confirm Details' screen, check the 'Profile this dataset after creation' and select your 'cpu-cluster' compute
+
+    A.5) Click 'Create'
+
+    Now that we have a dataset, we can click on it, review its content, profile, or potentially update it which will version it.
+
+    A.6) Click on 'Automated ML' in the left menu panel and click on 'new Automated ML'
+
+    A.7) Select your 'bank-marketing-training' dataset anc click Next
+
+        Experiment name:            bank-marketing-loan-prediction
+        Target column:              y
+        Select training cluster:    cpu-cluster
+
+    A.8) On the 'Select task type' screen, select 'Classification' and keep deep learning preview unchecked
+
+        Click on 'View additional configuration settings' and observe the parameters available to tune your ML run. No need to change anything. Note the concurrency setting which lets you control how many models run in parallel (one per cluster node max).
+
+        Click on 'View featurization settings' to see the controls related to featurization. By default all it automatic, but you could force a specific feature type or imputation model for each feature if needed. Leave all defaults.
+
+    A.9) Click on 'Finish' which creates the experiment and starts the execution
+
+    A.8) You can monitor the run from the experiment stage. If your cluster is idle, it may take a few minutes for things to kick off. Auto ML also first needs to generate a container image to run the models. The execution will also execute a 'Data guardrails' which will let you know about potential issues in your data for proper training.
+
+    We will let this experiment run and get back to it once it's in progress or completed.
+
+    Please feel free to check in the first few minutes what's happening, you'll see:
+    - in the logs the progress of the images being built and misc deployment preparation
+    - the Data guardrails complete with the results
+    - the Models being run
+
+    You can also go to the 'Compute' section, click on the 'cpu-cluster' and you'll see the cluster progressively size up to its maximum size as the models get queued up. It should quickly reach its maximum size of 4 nodes as the Auto ML experiment will probably run 30-50 models to find the best one for this load prediction.
+
+    As soon as a model completes under this Auto ML experiment, click on it to see its results, including its 'Visualizations' which will help you understand its performance.
+
+B) Designer: enables you to build Azure ML pipelines in a full Drag and Drop environment. This can be used for data preparation to generate training data sets, or end to end to train models.
+
+    B.1) 
+
+C) Notebooks
