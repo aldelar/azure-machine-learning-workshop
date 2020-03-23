@@ -1,6 +1,6 @@
 # azure-machine-learning-workshop
 
-A workshop leveraging Azure Machine Learning and introducing its key concepts and mode of operations.
+A workshop leveraging Azure Machine Learning and introducing its key concepts and mode of operations. A Product overview is available here: https://azure.microsoft.com/en-us/services/machine-learning/#product-overview
 
 # SETUP
 
@@ -141,13 +141,13 @@ A.7) Select your 'bank-marketing-training' dataset anc click Next
 
 A.8) On the 'Select task type' screen, select 'Classification' and keep deep learning preview unchecked
 
-    Click on 'View additional configuration settings' and observe the parameters available to tune your ML run. No need to change anything. Note the concurrency setting which lets you control how many models run in parallel (one per cluster node max).
+Click on 'View additional configuration settings' and observe the parameters available to tune your ML run. No need to change anything. Note the concurrency setting which lets you control how many models run in parallel (one per cluster node max).
 
-    Click on 'View featurization settings' to see the controls related to featurization. By default all it automatic, but you could force a specific feature type or imputation model for each feature if needed. Leave all defaults.
+Click on 'View featurization settings' to see the controls related to featurization. By default all it automatic, but you could force a specific feature type or imputation model for each feature if needed. Leave all defaults.
 
 A.9) Click on 'Finish' which creates the experiment and starts the execution
 
-A.8) You can monitor the run from the experiment stage. If your cluster is idle, it may take a few minutes for things to kick off. Auto ML also first needs to generate a container image to run the models. The execution will also execute a 'Data guardrails' which will let you know about potential issues in your data for proper training.
+A.10) You can monitor the run from the experiment stage. If your cluster is idle, it may take a few minutes for things to kick off. Auto ML also first needs to generate a container image to run the models. The execution will also execute a 'Data guardrails' which will let you know about potential issues in your data for proper training.
 
 We will let this experiment run and get back to it once it's in progress or completed.
 
