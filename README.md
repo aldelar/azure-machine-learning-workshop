@@ -93,11 +93,11 @@ This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving 
     Mouse over 'Samples', click on the '...' icon to get the dropdown and select 'Clone' to clone the sample notebooks into your own environment. Select the default target (your own folder already pre-creared) as target and clone the samples into it.
 
 
-# AZURE ML STUDIO WALK THROUGH AUTHORING OPTIONS
+# AUTHORING OPTIONS: AZURE ML STUDIO WALK THROUGH
 
 They are 3 Types of experiences to Author ML in Azure ML Studio: Automated ML, Designer, and Notebooks. We will go thru each of them to understand their modes of operations. They all leverage the same underlying Azure ML concepts of Datastores, Datasets, Experimennts, Runs, Compute, etc. but just represent 3 ways to develop Machine Learning models covering the full spectrum from No-Code to Code-Only.
 
-# AUTOMATED ML
+# AUTHORING WITH AUTOMATED ML
 A) Automated ML: trains and finds the best model based on your data without writing a single line of code
 
 We will create an Automated ML experiment to automatically train and find the best model to predict loan approvals based on applicants demographics.
@@ -166,7 +166,7 @@ Click on 'Deploy' to deploy the model. This will automatically generate a contai
 
 Click on 'Endpoints' to monitor the deployment of this endpoint. Once it is completely deployed, you'll be able to access the auto generated Swagger JSON and get access to the 'Consume' endpoint.
 
-# DESIGNER
+# AUTHORING WITH THE DESIGNER
 B) Designer: enables you to build Azure ML pipelines in a full Drag and Drop environment. This can be used for data preparation to generate training data sets, or end to end to train models.
 
 B.1) Click on 'Designer' in the left menu, and under 'New pipeline', click on the 'Sample 1: Regression - Automobile Price Prediction...' sample to load it up.
@@ -216,5 +216,5 @@ Reload your original Designer pipeline and try the following:
 - Click on the 'Split Data' step, and modify the split parameter from 0.7 to 0.8. Click on 'Submit' and select the previous experiment to re-execute it. Stay in place to observe the run re-executing only the steps that depend on the change.
 - You can monitor and review the output of each step as they complete, without leaving the designer.
 
-# NOTEBOOKS
+# AUTHORING WITH NOTEBOOKS
 C) Notebooks
