@@ -217,4 +217,4 @@ Reload your original Designer pipeline and try the following:
 - You can monitor and review the output of each step as they complete, without leaving the designer.
 
 # AUTHORING WITH NOTEBOOKS
-C) Notebooks
+C) (... Coming Soon ...)
