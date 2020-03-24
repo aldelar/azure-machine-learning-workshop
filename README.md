@@ -93,7 +93,7 @@ This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving 
     Mouse over 'Samples', click on the '...' icon to get the dropdown and select 'Clone' to clone the sample notebooks into your own environment. Select the default target (your own folder already pre-creared) as target and clone the samples into it.
 
 
-# AUTHORING OPTIONS: AZURE ML STUDIO WALK THROUGH
+# AUTHORING OPTIONS
 
 They are 3 Types of experiences to Author ML in Azure ML Studio: Automated ML, Designer, and Notebooks. We will go thru each of them to understand their modes of operations. They all leverage the same underlying Azure ML concepts of Datastores, Datasets, Experimennts, Runs, Compute, etc. but just represent 3 ways to develop Machine Learning models covering the full spectrum from No-Code to Code-Only.
 
