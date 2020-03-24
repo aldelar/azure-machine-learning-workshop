@@ -210,7 +210,13 @@ Click on deploy.
 
 After a few moments, you'll be able to see your endpoint under 'Endpoints' in the left menu pane. The Swagger URI will be automatically generated as well as the consumption REST API endpoint. It may take a few minutes for the container images to be fully generated and deployed.
 
-B.5) Modifying a Designer pipeline does not require a complete rerun. You'll be able to click on the different steps and review their outputs (logs or graphical visualizations) as well as modify them. The pipeline will only need to rerun what's changed and the dependencies, not every step. Its execution context is preserved to speed up iterative work.
+B.5) Once the runtime endpoint is in its fully deployed 'Healthy' deployment state, you have the abilty to test it directly from the Portal and get sample integration code for C#, Python and R.
+
+Click on your endpoint, and go to 'Test', then click on Test to execute an API call against the service. Modify the input parameters from here as need to run tests.
+
+Click on your endpoint 'Consume' panel and look at the C#, Python and R integration code snippets.
+
+B.6) Modifying a Designer pipeline does not require a complete rerun. You'll be able to click on the different steps and review their outputs (logs or graphical visualizations) as well as modify them. The pipeline will only need to rerun what's changed and the dependencies, not every step. Its execution context is preserved to speed up iterative work.
 
 Reload your original Designer pipeline and try the following:
 - Click on the 'Split Data' step, and modify the split parameter from 0.7 to 0.8. Click on 'Submit' and select the previous experiment to re-execute it. Stay in place to observe the run re-executing only the steps that depend on the change.
