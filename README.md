@@ -40,32 +40,22 @@ Make sure that all resources below are created within your Resource Group (there
         Workspace Name:     prx-mlws
         Workspace Edition:  Enterprise
 
-6) Create an instance of Azure "Cognitive Services"
-
-        Name:           prx-cs
-        Pricing Tier:   S0
-
-7) Create an Azure "Form Recognizer"
-
-        Name:           prx-fr
-        Pricing Tier:   S0
-
-8) Get into your Machine Learning workspace instance (created at step #5) and click on 'Launch Now' in the information box in the ML workspace panel.
+6) Get into your Machine Learning workspace instance (created at step #5) and click on 'Launch Now' in the information box in the ML workspace panel.
 
 You can also directly go to https://ml.azure.com/ and select the workspace created in step #5
 
 This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving foward) from which all ML resources can be managed and all your ML workflows can be built and executed, deployed from.
 
-9) In AMLS, click on 'Compute' under 'Manage' to create some compute resources:
+7) In AMLS, click on 'Compute' under 'Manage' to create some compute resources:
 
-    9.a) Under 'Compute Instances', click on '+' to create a new notebook VM
+    7.a) Under 'Compute Instances', click on '+' to create a new notebook VM
 
         Compute name:           prx-notebook-vm
         Virtual Machine Size:   Standard_D3_v2 or similar (4 vCPUs, 14GB RAM)
 
         This notebook vm will be used as an editing platform for ml development, it is automatically pre-integrated with the rest of Azure ML.
 
-    9.b) Under 'Training clusters', click on '+' to create a CPU based training cluster
+    7.b) Under 'Training clusters', click on '+' to create a CPU based training cluster
 
         Compute name:                   prx-training-cpu
         Virtual Machine Size:           Standard_D3_v2 or similar (4 vCPUs, 14GB RAM)
@@ -73,7 +63,7 @@ This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving 
         Maximum number of nodes:        4
         Idle seconds before scale down: 1200 (20 minutes to avoid shutdown/restart times during workshop)
 
-    9.c) Under 'Training clusters', click on '+' to create a GPU based training cluster
+    7.c) Under 'Training clusters', click on '+' to create a GPU based training cluster
 
         Compute name:                       prx-training-gpu
         Virtual Machine Size (click 'GPU'): Standard_NC6       
@@ -85,7 +75,7 @@ This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving 
 
     This enables you to create many different clusters with various configurations (CPU intensive vs Memory intensive vs GPU intensive) and pick the best training cluster for the workload w/o actually paying for anything unless it actually runs (charge is by the minute, from the time a cluster is up, the time it takes to get the cluster up is at no charge).
 
-    9.d) Under 'Inference clusters', click on '+' to create an inference cluster
+    7.d) Under 'Inference clusters', click on '+' to create an inference cluster
 
         Compute name:           prx-inference
         Virtual Machine size:   Standard_D3_v2 or similar (4 vCPUs, 14GB RAM)
@@ -98,12 +88,12 @@ This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving 
 
     NOTE: 'Attached compute' can also be leverage to 'bring your own compute' like a DataBricks cluster or specially tuned VMs of your choice.
 
-10) Click on 'Notebooks' under 'Author'
+8) Click on 'Notebooks' under 'Author'
 
     Mouse over 'Samples', click on the '...' icon to get the dropdown and select 'Clone' to clone the sample notebooks into your own environment. Select the default target (your own folder already pre-creared) as target and clone the samples into it.
 
 
-# AZURE ML STUDIO WALK THROUGH
+# AZURE ML STUDIO WALK THROUGH AUTHORING OPTIONS
 
 They are 3 Types of experiences to Author ML in Azure ML Studio: Automated ML, Designer, and Notebooks. We will go thru each of them to understand their modes of operations. They all leverage the same underlying Azure ML concepts of Datastores, Datasets, Experimennts, Runs, Compute, etc. but just represent 3 ways to develop Machine Learning models covering the full spectrum from No-Code to Code-Only.
 
@@ -125,7 +115,7 @@ Have a quick look at the data to note that features in the training data set and
 
 A.3) On the next screen, keep all defaults which should have auto-discovered the data types
 
-A.4) On the 'Confirm Details' screen, check the 'Profile this dataset after creation' and select your 'cpu-cluster' compute
+A.4) On the 'Confirm Details' screen, check the 'Profile this dataset after creation' and select your 'prx-training-cpu' compute
 
 A.5) Click 'Create'
 
@@ -137,7 +127,7 @@ A.7) Select your 'bank-marketing-training' dataset anc click Next
 
         Experiment name:            bank-marketing-loan-prediction
         Target column:              y
-        Select training cluster:    cpu-cluster
+        Select training cluster:    prx-training-cpu
 
 A.8) On the 'Select task type' screen, select 'Classification' and keep deep learning preview unchecked
 
@@ -156,12 +146,75 @@ Please feel free to check in the first few minutes what's happening, you'll see:
 - the Data guardrails complete with the results
 - the Models being run
 
-You can also go to the 'Compute' section, click on the 'cpu-cluster' and you'll see the cluster progressively size up to its maximum size as the models get queued up. It should quickly reach its maximum size of 4 nodes as the Auto ML experiment will probably run 30-50 models to find the best one for this load prediction.
+You can also go to the 'Compute' section, click on the 'prx-training-cpu' and you'll see the cluster progressively size up to its maximum size as the models get queued up. It should quickly reach its maximum size of 4 nodes as the Auto ML experiment will run about 50 models with this dataset to find the best one for this loan prediction.
 
 As soon as a model completes under this Auto ML experiment, click on it to see its results, including its 'Visualizations' which will help you understand its performance.
 
+Once the AutoML experiment completes, you'll be able to see the best model (auto sorted by Accuracy), look at its Details with Visualizations and its Explanation (auto computed for the best model).
+
+A.11) Click on 'Deploy best model', or go to 'Models' and select the model you wish to deploy if the best selected model is not the one you want to deploy to solve your use case.
+
+        Name:           bank-marketing-loan-prediction
+        Compute name:   prx-inference
+
+Click on 'Advanced':
+
+        CPU reserve capacity:       0.1
+        Memory reserve capacity:    0.1
+
+Click on 'Deploy' to deploy the model. This will automatically generate a containerized web service deployed in Kubernetes.
+
+Click on 'Endpoints' to monitor the deployment of this endpoint. Once it is completely deployed, you'll be able to access the auto generated Swagger JSON and get access to the 'Consume' endpoint.
+
 # DESIGNER
 B) Designer: enables you to build Azure ML pipelines in a full Drag and Drop environment. This can be used for data preparation to generate training data sets, or end to end to train models.
+
+B.1) Click on 'Designer' in the left menu, and under 'New pipeline', click on the 'Sample 1: Regression - Automobile Price Prediction...' sample to load it up.
+
+B.2) Under 'Settings' which should pop up, select your 'prx-training-cpu' as the Default compute target
+
+Observe the building blocks of this ML pipeline, from source DataSet, to data manipulations, data split, trainig, scoring and evaluation of the model.
+
+To discover the source data set, click on it, then 'Outputs' and then the graphic icon to get a preview of the data with its profiling.
+
+B.3) 'Submit' the experiment and select 'Create new' to create a new experiment
+
+        New experiment name:    automobile-price-prediction
+
+Click submit to run the experiment pipeline.
+
+You can monitor the progress of the experiment directly from the current screen, you'll see the time icons next to each step conver to green checkmarks as things get executed. Behind the scenes, you just create another ML experiment, which means it's building container images, and starting up the training compute if it was idling.
+
+Therefore, you can also monitor this experiment from the 'Experiments' left side menu item.
+
+B.4) Once the experiment is completed, we can create inference endpoints (APIs)
+
+Go to 'Designer', load your pipeline from the 'drafts' and click on 'Create inference pipeline'.
+You have two options here to create two types of endpoints, a real time (one item at a time) endpoint or a batch endoint (batch processing to integrate within an ETL process for instance).
+
+Select 'Real-time inference pipeline'.
+
+The Designer automatically creates a new inference pipeline from the Training pipeline we've been working from, and adds a 'Web Service Input' and a 'Web Service Output' step automatically. This basically transforms our pipeline into a Web Service API. CLick on 'Submit' and then:
+
+    Experiment:             Create New
+    New experiment name:    automobile-price-prediction-realtime
+
+Click 'Submit' and stay on the screen. The pipeline will quickly run to generate the code that will drive this web service.
+
+Once it has completed, click on 'Deploy':
+
+    Real-time endpoint name:        automobile-price-rt-endpoint
+    Compute target:                 prx-inference
+
+Click on deploy.
+
+After a few moments, you'll be able to see your endpoint under 'Endpoints' in the left menu pane. The Swagger URI will be automatically generated as well as the consumption REST API endpoint. It may take a few minutes for the container images to be fully generated and deployed.
+
+B.5) Modifying a Designer pipeline does not require a complete rerun. You'll be able to click on the different steps and review their outputs (logs or graphical visualizations) as well as modify them. The pipeline will only need to rerun what's changed and the dependencies, not every step. Its execution context is preserved to speed up iterative work.
+
+Reload your original Designer pipeline and try the following:
+- Click on the 'Split Data' step, and modify the split parameter from 0.7 to 0.8. Click on 'Submit' and select the previous experiment to re-execute it. Stay in place to observe the run re-executing only the steps that depend on the change.
+- You can monitor and review the output of each step as they complete, without leaving the designer.
 
 # NOTEBOOKS
 C) Notebooks
