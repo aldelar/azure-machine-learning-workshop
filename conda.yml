@@ -3,3 +3,16 @@ dependencies:
 - pip
 - python=3.7
 - pylint
+- pip:
+  - azureml-contrib-pipeline-steps
+  - azureml-dataprep
+  - azureml-pipeline-core
+  - azureml-sdk
+  - azureml-train
+  - azureml-train-automl
+  - azureml-widgets
+  - ipykernel
+  - jupyter
+  - numpy
+  - pandas
+  - requests
