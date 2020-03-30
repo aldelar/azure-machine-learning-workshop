@@ -1,6 +1,9 @@
 # Azure ML Configuration file for LOCAL execution
 config.json
 
+# Visual Studio Code
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
