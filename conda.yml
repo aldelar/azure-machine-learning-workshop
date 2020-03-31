@@ -2,18 +2,14 @@ name: azure-machine-learning-workshop
 dependencies:
 - pip
 - python=3.7
-- pylint
 - pip:
   - azureml
   - azureml-contrib-pipeline-steps
-  - azureml-dataprep[pandas]
+  - azureml-dataprep[fuse,pandas]
   - azureml-pipeline-core
   - azureml-sdk
   - azureml-train
   - azureml-train-automl
   - azureml-widgets
-  - ipykernel
-  - jupyter
   - numpy
   - pandas
-  - requests
