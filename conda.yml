@@ -4,8 +4,9 @@ dependencies:
 - python=3.7
 - pylint
 - pip:
+  - azureml
   - azureml-contrib-pipeline-steps
-  - azureml-dataprep
+  - azureml-dataprep[pandas]
   - azureml-pipeline-core
   - azureml-sdk
   - azureml-train
