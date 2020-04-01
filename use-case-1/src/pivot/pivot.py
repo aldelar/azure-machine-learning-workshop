@@ -18,8 +18,7 @@ args = parser.parse_args()
 print("Output: %s" % args.output)
 
 # Retrieve Input Dataset
-run_context = Run.get_context()
-input_ds = run_context.input_datasets["time_series"]
+input_ds = Run.get_context().input_datasets["time_series"]
 
 # Read dataset as a DataFrame
 input_df = input_ds.to_pandas_dataframe()
