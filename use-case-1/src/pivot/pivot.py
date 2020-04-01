@@ -1,6 +1,5 @@
 #
-from azureml.core import Workspace, Dataset, Run
-from azureml import DataTypeIds
+from azureml.core import Run, Dataset
 
 #
 import argparse, os
@@ -12,33 +11,28 @@ import numpy as np
 def gen_date(d,h):
     return d + dt.timedelta(hours=int(h))
 
-# Pivot Parameters
-parser = argparse.ArgumentParser("extract")
-parser.add_argument("--input_dataset", type=str, help="input_dataset")
-parser.add_argument("--output_dataset", type=str, help="output_dataset")
+# Script Parameters
+parser = argparse.ArgumentParser("pivot")
+parser.add_argument("--output", type=str, help="output")
 args = parser.parse_args()
-print("Input DataSet: %s" % args.input_dataset)
-print("Output DataSet: %s" % args.output_dataset)
+print("Output: %s" % args.output)
 
 # Retrieve Input Dataset
-ws = Workspace.from_config()
-input_dataset = Dataset.get_by_name(ws, name=args.input_dataset)
+run_context = Run.get_context()
+input_ds = run_context.input_datasets["time_series"]
 
-# ability to develop/work on samples from the original dataset (0.01 = 1% of full dataset)
-#input_df = input_dataset.take_sample(0.01).to_pandas_dataframe()
-input_df = input_dataset.to_pandas_dataframe()
-print(input_df)
+# Read dataset as a DataFrame
+input_df = input_ds.to_pandas_dataframe()
+# NOTE: Ability to develop/work on samples from the original dataset (0.01 = 1% of full dataset)
+# input_df = input_dataset.take_sample(0.01).to_pandas_dataframe()
 
 # Generate timestamp column 'DATE' FROM 'MYDATE' and 'HOUR'
 input_df['DATE'] = input_df.apply(lambda x: gen_date(x.MYDATE, x.HOUR), axis=1)
+# Only keep necessary columns
 input_df = input_df[['DATE','NODE_ID','MW']]
-
 # Pivot Data
 output_df = pd.pivot_table(input_df, values='MW', index='DATE', columns='NODE_ID', aggfunc=np.max)
 
 # write output dataset
-dataset = ws.datasets.add_from_dataframe(
-    dataframe=output_df,
-    data_type_id=DataTypeIds.GenericCSV,
-    name=args.output_dataset
-)
+output_df.to_csv(args.output,encoding='utf-8')
+print("%s created" % args.output)
