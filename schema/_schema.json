@@ -1,0 +1,340 @@
+{
+  "columnAttributes": [
+    {
+      "name": "N1_L1_min",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "N1_L1_max",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "N1_L1_sum",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "N1_L1_median",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "N1_L1_mean",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "N1_L1_std",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_L1_min",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_L1_max",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_L1_sum",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_L1_median",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_L1_mean",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_L1_std",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "Z1_min",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "Z1_max",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "Z1_sum",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "Z1_median",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "Z1_mean",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "Z1_std",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "N1_R1_min",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "N1_R1_max",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "N1_R1_sum",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "N1_R1_median",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "N1_R1_mean",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "N1_R1_std",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_R1_min",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_R1_max",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_R1_sum",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_R1_median",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_R1_mean",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "S1_R1_std",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "CLOAD_min",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "CLOAD_max",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "CLOAD_sum",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "CLOAD_median",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "CLOAD_mean",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "CLOAD_std",
+      "type": "Numeric",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "float64",
+        "isNullable": false
+      }
+    },
+    {
+      "name": "RDATE",
+      "type": "Object",
+      "isFeature": true,
+      "elementType": {
+        "typeName": "object",
+        "isNullable": false
+      }
+    }
+  ],
+  "featureChannels": [],
+  "labelColumns": {},
+  "scoreColumns": {}
+}
