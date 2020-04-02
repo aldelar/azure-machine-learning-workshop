@@ -37,7 +37,7 @@ if args.input_3:
 
 # parse date to cleanup to standard format
 if args.cleanup_date_column:
-    output_df[args.cleanup_date_column].apply(lambda x: parse(x[args.cleanup_date_column]).date(), axis=1)
+    output_df[args.cleanup_date_column] = output_df.apply(lambda x: parse(x[args.cleanup_date_column]).date(), axis=1)
 
 # write output dataset
 output_df.to_csv(args.output,index=False,encoding='utf-8')
