@@ -21,6 +21,7 @@ print("Input 3: %s" % args.input_3)
 print("Output : %s" % args.output)
 
 # Retrieve Input Datasets
+# Get data from inputs, which are pre-mounted file paths
 input_df_1 = pd.read_csv(args.input_1)
 input_df_2 = pd.read_csv(args.input_2)
 if args.input_3:
