@@ -30,7 +30,7 @@ print("Output : %s" % args.output_ds)
 input_df = pd.read_csv(args.input_ds)
 
 # Generate DATE column
-input_df[args.date_column_name] = input_df.apply(lambda x: dateutil.parser.parse(x[agrs.datetime_column]).date(), axis=1)
+input_df[args.date_column_name] = input_df.apply(lambda x: dateutil.parser.parse(x[args.datetime_column]).date(), axis=1)
 
 # Aggregates
 output_df = input_df.groupby(args.date_column_name).aggregate([min, max, sum, np.median, np.mean, np.std])
