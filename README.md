@@ -223,4 +223,55 @@ Reload your original Designer pipeline and try the following:
 - You can monitor and review the output of each step as they complete, without leaving the designer.
 
 # AUTHORING WITH NOTEBOOKS
-C) (... Coming Soon ...)
+
+We will target a Time Series prediction scenario to introduce some key concepts around working with Azure ML with the Notebook experience.
+
+Concepts to be introduced in this lab session around the Azure ML SDK which enables full access to Azure ML from a Notebook experience:
+- Workspace integration: how to connect your notebook to your AML Workspace to leverage all its resources
+- Targetting AML Compute resources
+- Creating Compute Configuration to properly manage your code libraries dependencies and enforce tight control of the runtime computes
+- Data access via DataSets (see examples above), DataReferences (ability to reference data directly in the Data Lake), and PipelineData (enabling exchange of intermadiate data between pipeline steps)
+- Pipeline Steps: input/output/dependency control, re-usability to leverage 'compute only when needed'
+- Building a pipeline and running it via an Azure ML Experiment
+- Full Monitoring of execution from Notebooks
+- Access to intermediate data steps for debugging
+
+We'll go thru the following:
+- Quick Review of a Time Series example via AutoML in the portal with a sample data use case
+- Use of real life disparate data sources to build an engineering pipeline to generate a training data sets for a time series scenario
+- Leverage of this data set in an AutoML Experiment (via UI or via Notebook step)
+
+C) Time Series Prediction with AutoML via an example scenario
+
+    Go to https://ml.azure.com and click on Automated ML, then 'New Automated ML run'
+    
+    Follow the instructions from this example: https://docs.microsoft.com/en-us/azure/machine-learning/tutorial-automated-ml-forecast
+
+    PLEASE MAKE SURE to ignore the two columns 'casual' and 'registered' from the dataset as they are breakdown values of the 'cnt' column we're trying to predict.
+
+    NOTE: leverage the existing CPU compute created in the previous parts of this workshop. No need to create a new one.
+
+    We will kick off the experiment, and get back to the results later. This should take from 10 to 20 minutes depending on your cluster configuration.
+
+D) Data Engineering in Azure ML Notebooks
+
+    Use Case #1: time series predictions
+
+    Input Datasets:
+    - h_time_series_1: hourly time series with multiple features that need to be pivoted. Date + Hour columns.
+    - h_time_series_2: hourly time series with multiple features that need to be pivoted. Date + Hour columns.
+    - h_time_series_3: hourly time series, no need to pivot. Date + Hour columns.
+    - d_time_series_1: daily time series with one feature, date column needs reformatting
+    - d_time_series_2: daily time series containing the column to predict, date column needs reformatting
+
+    We will build a data engineering pipeline which prepares a training data sets combining all these data sources:
+    - Steps: pivot h_time_series_1, h_time_series_2, h_time_series_3 -> P1,P2,P3
+    - Step: join the 3 pivotes series -> P1 U P2 U P3 -> H
+    - Step: aggregate the joined data at a day level, and generate statistical values for each day (24 hourly data points summarized as min, max, mean, etc.) -> H -> H_D
+    - Step: join two hourly series, and clean up dates -> D
+    - Step: join H_D with D -> H_D U D to generate the infal data set -> F
+
+    A notebook is available that constructs all these pipeline elements:
+    https://github.com/aldelar/azure-machine-learning-workshop/use-case-1/use-case-1/data-prep-pipeline.ipynb
+
+    The notebook final step geneates a DataSet named 'use-case-1-d' for the daily level combined features. This is the data set to leverage to run AutoML for time series as done in C. Consider using Deep Learning with a GPU cluster.
