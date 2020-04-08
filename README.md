@@ -4,11 +4,11 @@ A workshop leveraging Azure Machine Learning and introducing its key concepts an
 
 # SETUP
 
-1) Login to your subscription
+## 1) Login to your subscription
 
     URL: https://portal.azure.com/
 
-2) For all Azure resources, consider using a prefix that is short and tied to your identity to alleviate the possibilities of name collisions for the azure resources which are URIs.
+## 2) For all Azure resources, consider using a prefix that is short and tied to your identity to alleviate the possibilities of name collisions for the azure resources which are URIs.
 
 For instance, consider a 2 or 3 letters prefix withlike: first letter of (first name, middle name, last name).
 
@@ -17,12 +17,12 @@ Note that your prefix should be all lowercase to respect some of the resources n
 
 ** Replace 'prx' with your own personal prefix everywhere below **
 
-3) Pick a region from the following regions based on your locations:
+## 3) Pick a region from the following regions based on your locations:
 East US, East US 2, SOuth Central US, West US 2
 
 Create all resources below in the same selection region of your choice. The name of the resource between quotes "(name of resource)" is a good term to use in the search box when creating a resource in the Azure portal.
 
-4) Create a "Resource Group" unless your Azure administrator already created one for you, in that case skip to step #5, but read NOTE (*) below
+## 4) Create a "Resource Group" unless your Azure administrator already created one for you, in that case skip to step #5, but read NOTE (*) below
 
         Name:       prx-azure-ml-workshop
         Location:   region selected in step #3
@@ -35,27 +35,27 @@ Everything else left as default (moving forward, when not specified, use the def
 
 Make sure that all resources below are created within your Resource Group (there will always be an option to change/set the resource group a resource belongs to, make sure it matches yours)
 
-5) Create an Azure "Machine Learning" Workspace
+## 5) Create an Azure "Machine Learning" Workspace
 
         Workspace Name:     prx-mlws
         Workspace Edition:  Enterprise
 
-6) Get into your Machine Learning workspace instance (created at step #5) and click on 'Launch Now' in the information box in the ML workspace panel.
+## 6) Get into your Machine Learning workspace instance (created at step #5) and click on 'Launch Now' in the information box in the ML workspace panel.
 
 You can also directly go to https://ml.azure.com/ and select the workspace created in step #5
 
 This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving foward) from which all ML resources can be managed and all your ML workflows can be built and executed, deployed from.
 
-7) In AMLS, click on 'Compute' under 'Manage' to create some compute resources:
+## 7) In AMLS, click on 'Compute' under 'Manage' to create some compute resources:
 
-    7.a) Under 'Compute Instances', click on '+' to create a new notebook VM
+### 7.a) Under 'Compute Instances', click on '+' to create a new notebook VM
 
         Compute name:           prx-notebook-vm
         Virtual Machine Size:   Standard_D3_v2 or similar (4 vCPUs, 14GB RAM)
 
         This notebook vm will be used as an editing platform for ml development, it is automatically pre-integrated with the rest of Azure ML.
 
-    7.b) Under 'Training clusters', click on '+' to create a CPU based training cluster
+### 7.b) Under 'Training clusters', click on '+' to create a CPU based training cluster
 
         Compute name:                   prx-training-cpu
         Virtual Machine Size:           Standard_D3_v2 or similar (4 vCPUs, 14GB RAM)
@@ -63,7 +63,7 @@ This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving 
         Maximum number of nodes:        4
         Idle seconds before scale down: 1200 (20 minutes to avoid shutdown/restart times during workshop)
 
-    7.c) Under 'Training clusters', click on '+' to create a GPU based training cluster
+### 7.c) Under 'Training clusters', click on '+' to create a GPU based training cluster
 
         Compute name:                       prx-training-gpu
         Virtual Machine Size (click 'GPU'): Standard_NC6       
@@ -75,7 +75,7 @@ This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving 
 
     This enables you to create many different clusters with various configurations (CPU intensive vs Memory intensive vs GPU intensive) and pick the best training cluster for the workload w/o actually paying for anything unless it actually runs (charge is by the minute, from the time a cluster is up, the time it takes to get the cluster up is at no charge).
 
-    7.d) Under 'Inference clusters', click on '+' to create an inference cluster
+### 7.d) Under 'Inference clusters', click on '+' to create an inference cluster
 
         Compute name:           prx-inference
         Virtual Machine size:   Standard_D3_v2 or similar (4 vCPUs, 14GB RAM)
@@ -88,7 +88,7 @@ This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving 
 
     NOTE: 'Attached compute' can also be leverage to 'bring your own compute' like a DataBricks cluster or specially tuned VMs of your choice.
 
-8) Click on 'Notebooks' under 'Author'
+## 8) Click on 'Notebooks' under 'Author'
 
     Mouse over 'Samples', click on the '...' icon to get the dropdown and select 'Clone' to clone the sample notebooks into your own environment. Select the default target (your own folder already pre-creared) as target and clone the samples into it.
 
@@ -98,46 +98,47 @@ This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving 
 They are 3 Types of experiences to Author ML in Azure ML Studio: Automated ML, Designer, and Notebooks. We will go thru each of them to understand their modes of operations. They all leverage the same underlying Azure ML concepts of Datastores, Datasets, Experimennts, Runs, Compute, etc. but just represent 3 ways to develop Machine Learning models covering the full spectrum from No-Code to Code-Only.
 
 # AUTHORING WITH AUTOMATED ML
-A) Automated ML: trains and finds the best model based on your data without writing a single line of code
+
+## A) Automated ML: trains and finds the best model based on your data without writing a single line of code
 
 We will create an Automated ML experiment to automatically train and find the best model to predict loan approvals based on applicants demographics.
 
-A.1) Click on Datasets in the left side menu, and then Create Dataset 'from web file'
+### A.1) Click on Datasets in the left side menu, and then Create Dataset 'from web file'
 
         Web URL:    https://automlsamplenotebookdata.blob.core.windows.net/automl-sample-notebook-data/bankmarketing_train.csv
         Name:       bank-marketing-training
 
-A.2) On the next screen, keep all defaults except:
+### A.2) On the next screen, keep all defaults except:
 
         Column headers:     All files have same headers
 
 Have a quick look at the data to note that features in the training data set and the 'y' column which we are going to try to predict.
 
-A.3) On the next screen, keep all defaults which should have auto-discovered the data types
+### A.3) On the next screen, keep all defaults which should have auto-discovered the data types
 
-A.4) On the 'Confirm Details' screen, check the 'Profile this dataset after creation' and select your 'prx-training-cpu' compute
+### A.4) On the 'Confirm Details' screen, check the 'Profile this dataset after creation' and select your 'prx-training-cpu' compute
 
-A.5) Click 'Create'
+### A.5) Click 'Create'
 
 Now that we have a dataset, we can click on it, review its content, profile, or potentially update it which will version it.
 
-A.6) Click on 'Automated ML' in the left menu panel and click on 'new Automated ML'
+### A.6) Click on 'Automated ML' in the left menu panel and click on 'new Automated ML'
 
-A.7) Select your 'bank-marketing-training' dataset anc click Next
+### A.7) Select your 'bank-marketing-training' dataset anc click Next
 
         Experiment name:            bank-marketing-loan-prediction
         Target column:              y
         Select training cluster:    prx-training-cpu
 
-A.8) On the 'Select task type' screen, select 'Classification' and keep deep learning preview unchecked
+### A.8) On the 'Select task type' screen, select 'Classification' and keep deep learning preview unchecked
 
 Click on 'View additional configuration settings' and observe the parameters available to tune your ML run. No need to change anything. Note the concurrency setting which lets you control how many models run in parallel (one per cluster node max).
 
 Click on 'View featurization settings' to see the controls related to featurization. By default all it automatic, but you could force a specific feature type or imputation model for each feature if needed. Leave all defaults.
 
-A.9) Click on 'Finish' which creates the experiment and starts the execution
+### A.9) Click on 'Finish' which creates the experiment and starts the execution
 
-A.10) You can monitor the run from the experiment stage. If your cluster is idle, it may take a few minutes for things to kick off. Auto ML also first needs to generate a container image to run the models. The execution will also execute a 'Data guardrails' which will let you know about potential issues in your data for proper training.
+### A.10) You can monitor the run from the experiment stage. If your cluster is idle, it may take a few minutes for things to kick off. Auto ML also first needs to generate a container image to run the models. The execution will also execute a 'Data guardrails' which will let you know about potential issues in your data for proper training.
 
 We will let this experiment run and get back to it once it's in progress or completed.
 
@@ -152,7 +153,7 @@ As soon as a model completes under this Auto ML experiment, click on it to see i
 
 Once the AutoML experiment completes, you'll be able to see the best model (auto sorted by Accuracy), look at its Details with Visualizations and its Explanation (auto computed for the best model).
 
-A.11) Click on 'Deploy best model', or go to 'Models' and select the model you wish to deploy if the best selected model is not the one you want to deploy to solve your use case.
+### A.11) Click on 'Deploy best model', or go to 'Models' and select the model you wish to deploy if the best selected model is not the one you want to deploy to solve your use case.
 
         Name:           bank-marketing-loan-prediction
         Compute name:   prx-inference
@@ -167,17 +168,18 @@ Click on 'Deploy' to deploy the model. This will automatically generate a contai
 Click on 'Endpoints' to monitor the deployment of this endpoint. Once it is completely deployed, you'll be able to access the auto generated Swagger JSON and get access to the 'Consume' endpoint.
 
 # AUTHORING WITH THE DESIGNER
-B) Designer: enables you to build Azure ML pipelines in a full Drag and Drop environment. This can be used for data preparation to generate training data sets, or end to end to train models.
 
-B.1) Click on 'Designer' in the left menu, and under 'New pipeline', click on the 'Sample 1: Regression - Automobile Price Prediction...' sample to load it up.
+## B) Designer: enables you to build Azure ML pipelines in a full Drag and Drop environment. This can be used for data preparation to generate training data sets, or end to end to train models.
 
-B.2) Under 'Settings' which should pop up, select your 'prx-training-cpu' as the Default compute target
+### B.1) Click on 'Designer' in the left menu, and under 'New pipeline', click on the 'Sample 1: Regression - Automobile Price Prediction...' sample to load it up.
+
+### B.2) Under 'Settings' which should pop up, select your 'prx-training-cpu' as the Default compute target
 
 Observe the building blocks of this ML pipeline, from source DataSet, to data manipulations, data split, trainig, scoring and evaluation of the model.
 
 To discover the source data set, click on it, then 'Outputs' and then the graphic icon to get a preview of the data with its profiling.
 
-B.3) 'Submit' the experiment and select 'Create new' to create a new experiment
+### B.3) 'Submit' the experiment and select 'Create new' to create a new experiment
 
         New experiment name:    automobile-price-prediction
 
@@ -187,7 +189,7 @@ You can monitor the progress of the experiment directly from the current screen,
 
 Therefore, you can also monitor this experiment from the 'Experiments' left side menu item.
 
-B.4) Once the experiment is completed, we can create inference endpoints (APIs)
+### B.4) Once the experiment is completed, we can create inference endpoints (APIs)
 
 Go to 'Designer', load your pipeline from the 'drafts' and click on 'Create inference pipeline'.
 You have two options here to create two types of endpoints, a real time (one item at a time) endpoint or a batch endoint (batch processing to integrate within an ETL process for instance).
@@ -210,13 +212,13 @@ Click on deploy.
 
 After a few moments, you'll be able to see your endpoint under 'Endpoints' in the left menu pane. The Swagger URI will be automatically generated as well as the consumption REST API endpoint. It may take a few minutes for the container images to be fully generated and deployed.
 
-B.5) Once the runtime endpoint is in its fully deployed 'Healthy' deployment state, you have the abilty to test it directly from the Portal and get sample integration code for C#, Python and R.
+### B.5) Once the runtime endpoint is in its fully deployed 'Healthy' deployment state, you have the abilty to test it directly from the Portal and get sample integration code for C#, Python and R.
 
 Click on your endpoint, and go to 'Test', then click on Test to execute an API call against the service. Modify the input parameters from here as need to run tests.
 
 Click on your endpoint 'Consume' panel and look at the C#, Python and R integration code snippets.
 
-B.6) Modifying a Designer pipeline does not require a complete rerun. You'll be able to click on the different steps and review their outputs (logs or graphical visualizations) as well as modify them. The pipeline will only need to rerun what's changed and the dependencies, not every step. Its execution context is preserved to speed up iterative work.
+### B.6) Modifying a Designer pipeline does not require a complete rerun. You'll be able to click on the different steps and review their outputs (logs or graphical visualizations) as well as modify them. The pipeline will only need to rerun what's changed and the dependencies, not every step. Its execution context is preserved to speed up iterative work.
 
 Reload your original Designer pipeline and try the following:
 - Click on the 'Split Data' step, and modify the split parameter from 0.7 to 0.8. Click on 'Submit' and select the previous experiment to re-execute it. Stay in place to observe the run re-executing only the steps that depend on the change.
@@ -241,7 +243,7 @@ We'll go thru the following:
 - Use of real life disparate data sources to build an engineering pipeline to generate a training data sets for a time series scenario
 - Leverage of this data set in an AutoML Experiment (via UI or via Notebook step)
 
-C) Time Series Prediction with AutoML via an example scenario
+## C) Time Series Prediction with AutoML via an example scenario
 
     Go to https://ml.azure.com and click on Automated ML, then 'New Automated ML run'
     
@@ -253,7 +255,7 @@ C) Time Series Prediction with AutoML via an example scenario
 
     We will kick off the experiment, and get back to the results later. This should take from 10 to 20 minutes depending on your cluster configuration.
 
-D) Data Engineering in Azure ML Notebooks
+## D) Data Engineering in Azure ML Notebooks
 
     Use Case #1: time series predictions
 
@@ -288,7 +290,7 @@ D) Data Engineering in Azure ML Notebooks
 
 Once created, you can jump to the Data Factory studio via https://adf.azure.com/
 
-E.2) Setting up 'Connections' in the Data Factory
+### E.2) Setting up 'Connections' in the Data Factory
 
 Click on 'Connections' at the bottom left of the screen
 Create a '+ New' connection
@@ -300,7 +302,7 @@ Pick your subscription from the subscription dropdown, then pick the 'Storage ac
 
 Click 'Test Connection' to make sure it works, and then 'Create'
 
-E.3) Setting up DataSets
+### E.3) Setting up DataSets
 
 Click on '...' next to Datasets on the left menu pane, and select 'New Dataset'.
 Select 'Azure Blob Storage' from the source storage option pane (you can search for it), click 'Continue' and select 'DelimitedText' as the format.
@@ -316,7 +318,7 @@ Once created, it should show up on a new tab, click on the 'Connection' subtab, 
 
 NOTE: Click on 'Validate all' to make sure there's no error and then 'Publish all' to save the new objects.
 
-E.4) Repeat E.3 for the following datasets: h_time_series_2, h_time_series_3, d_time_series_1, d_time_series_2
+### E.4) Repeat E.3 for the following datasets: h_time_series_2, h_time_series_3, d_time_series_1, d_time_series_2
 
 The easiest way to do this is to leverage the 'Clone' feature.
 
@@ -328,7 +330,7 @@ Check that everything is ok with 'Preview Data'.
 
 Repeat the cloning process 3 times to create h_time_series_3, d_time_series_1, and d_time_series_2
 
-E.5) Create a new 'Pipeline by clicking the '...' in the Pipelines menu item in the left pane
+### E.5) Create a new 'Pipeline by clicking the '...' in the Pipelines menu item in the left pane
 
 Rename it 'Time Series Data Prep'
 Open up the 'Move & transform' section and drag and drop a 'Data flow' activity.
@@ -338,7 +340,7 @@ A new DataFlow canvas opens up. Rename it to 'Time Series Data Flow'
 
 Click on 'Data flow debug' on the top menu bar to kick off the debug runtime (it takes a few minutes).
 
-E.6) Configuring the Data Flow
+### E.6) Configuring the Data Flow
 
 Add 3 Data Sources by clicking the 'Add Source' box in the canvas, and select 'h_time_series_1' from the drop down. Rename it as well propely like 'htimeseries1' (note: no space or _ allowed for the names). Repeat the process for 'h_time_series_2' and 'h_time_series_3' datasets to set them as data sources for the Data Flow.
 
