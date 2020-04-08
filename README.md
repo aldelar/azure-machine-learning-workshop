@@ -278,9 +278,9 @@ D) Data Engineering in Azure ML Notebooks
 
 # PULLING DATA INTO THE DATA LAKE & DATA ENGINEERING WITH AZURE DATA FACTORY
 
-E) Data Engineering in Azure Data Factory
+## E) Data Engineering in Azure Data Factory
 
-E.1) Create a Data Factory:
+### E.1) Create a Data Factory:
 
         Name:       prx-adf
         Version:    V2
