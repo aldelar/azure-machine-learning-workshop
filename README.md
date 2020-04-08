@@ -393,3 +393,35 @@ Now click on 'Validate all', and then 'Publish all'.
 
 Go back to the pipeline, and click 'Debug' to run everything and generate the training file.
 While it's running, you can click on the 'glasses' icon and see the details of the run, step by step with statistics about each step.
+
+### E.7) Create a DataSet in Azure ML Pointing to the target folder destination of E.6
+
+Go to https://ml.azure.com to get back into your Azure ML Workspace. Create a new DataSet 'from datastore':
+
+                Name:           d_use_case_1_adf
+                Type:           Tabular
+                Datastore:      workspaceblobstore
+
+When asked to 'Browse', select your 'datasets' folder, and then select the 'time-series-training' folder. DO NOT select the file, so that the dataset can work independently of how the data is generated into this folder (either a single file or multiple files).
+
+Click on 'Next' and make sure you delect 'Column headers' to be 'all files have same headers'.
+
+Click 'Next' and MAKE SURE YOU UNSELECT THE DUPLICATE TIME COLUMNS to only keep 'DATE' for instance (in that case unselect RDATE and MYDATE).
+
+Click on 'Next' and select 'Profile this dataset after creation' against your CPU compute.
+
+### E.8) Use your Data Factory generated DataSet as a training set for an AutoML Experiment to predict X2 from the available features
+
+Click on Automated ML on the left menu pane and create a new AutoML Experiment.
+
+Select the 'd_use_case_1_adf' dataset you just created.
+
+Call the experiment 'd_use_case_1_adf_automl', and select 'X2' as the target column.
+
+On the next screen select 'Time series forecasting' as a task type, and select 'DATE' as the time column.
+
+Click 'Finish' to kick off the Experiment.
+
+Feel free to create a second AutoML run against the same dataset but with 'Deep Learning' enabled. You can, and probably SHOULD to keep things together, reuse the same experiment when you create the second run using Deep Learning. You are afterall trying to solve the same problem but just with a different approach. If you have two training clusters, you could send each job against a different cluster to parallelize this accordingly. If sent to the same clusters, the jobs of each experiment will compete for compute and stagger as they come.
+
+This concludes this chapter around Use Case 1 to take care of data prep in a full code environment with Notebooks and Azure ML Pipelines, or in a full No Code environment with Azure Data Factory and Azure DataFlow.
