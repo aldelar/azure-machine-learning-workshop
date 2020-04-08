@@ -1,12 +1,12 @@
 # azure-machine-learning-workshop
 
-A workshop leveraging Azure Machine Learning and introducing its key concepts and mode of operations. A Product overview is available here: https://azure.microsoft.com/en-us/services/machine-learning/#product-overview
+A workshop leveraging Azure Machine Learning and introducing its key concepts and mode of operations. A Product overview is available [here.](https://azure.microsoft.com/en-us/services/machine-learning/#product-overview)
 
 # SETUP
 
 ## 1) Login to your subscription
 
-    URL: https://portal.azure.com/
+[Go to the Azure Portal](https://portal.azure.com/)
 
 ## 2) For all Azure resources, consider using a prefix that is short and tied to your identity to alleviate the possibilities of name collisions for the azure resources which are URIs.
 
@@ -42,7 +42,7 @@ Make sure that all resources below are created within your Resource Group (there
 
 ## 6) Get into your Machine Learning workspace instance (created at step #5) and click on 'Launch Now' in the information box in the ML workspace panel.
 
-You can also directly go to https://ml.azure.com/ and select the workspace created in step #5
+You can also directly go to [https://ml.azure.com/](https://ml.azure.com/) and select the workspace created in step #5
 
 This will lauch the 'Azure Machine Learning Studio' (referred to as AMLS moving foward) from which all ML resources can be managed and all your ML workflows can be built and executed, deployed from.
 
@@ -245,19 +245,19 @@ We'll go thru the following:
 
 ## C) Time Series Prediction with AutoML via an example scenario
 
-    Go to https://ml.azure.com and click on Automated ML, then 'New Automated ML run'
-    
-    Follow the instructions from this example: https://docs.microsoft.com/en-us/azure/machine-learning/tutorial-automated-ml-forecast
+Go to [https://ml.azure.com](https://ml.azure.com) and click on Automated ML, then 'New Automated ML run'
 
-    PLEASE MAKE SURE to ignore the two columns 'casual' and 'registered' from the dataset as they are breakdown values of the 'cnt' column we're trying to predict.
+Follow the instructions from this example: [https://docs.microsoft.com/en-us/azure/machine-learning/tutorial-automated-ml-forecast](https://docs.microsoft.com/en-us/azure/machine-learning/tutorial-automated-ml-forecast)
 
-    NOTE: leverage the existing CPU compute created in the previous parts of this workshop. No need to create a new one.
+PLEASE MAKE SURE to ignore the two columns 'casual' and 'registered' from the dataset as they are breakdown values of the 'cnt' column we're trying to predict.
 
-    We will kick off the experiment, and get back to the results later. This should take from 10 to 20 minutes depending on your cluster configuration.
+NOTE: leverage the existing CPU compute created in the previous parts of this workshop. No need to create a new one.
+
+We will kick off the experiment, and get back to the results later. This should take from 10 to 20 minutes depending on your cluster configuration.
 
 ## D) Data Engineering in Azure ML Notebooks
 
-    Use Case #1: time series predictions
+Use Case #1: time series predictions
 
     Input Datasets:
     - h_time_series_1: hourly time series with multiple features that need to be pivoted. Date + Hour columns.
@@ -273,14 +273,26 @@ We'll go thru the following:
     - Step: join two hourly series, and clean up dates -> D
     - Step: join H_D with D -> H_D U D to generate the infal data set -> F
 
-    A notebook is available that constructs all these pipeline elements:
-    https://github.com/aldelar/azure-machine-learning-workshop/use-case-1/use-case-1/data-prep-pipeline.ipynb
+Here is an output of the final pipeline we will build to accomplish the data preparation for this use case:
+![screeshot](screenshots/aml-pipeline.png)
+
+
+
+A notebook is available that constructs all these pipeline elements:
+[https://github.com/aldelar/azure-machine-learning-workshop/use-case-1/use-case-1/data-prep-pipeline.ipynb](https://github.com/aldelar/azure-machine-learning-workshop/use-case-1/use-case-1/data-prep-pipeline.ipynb)
 
     The notebook final step geneates a DataSet named 'use-case-1-d' for the daily level combined features. This is the data set to leverage to run AutoML for time series as done in C. Consider using Deep Learning with a GPU cluster.
 
-# PULLING DATA INTO THE DATA LAKE & DATA ENGINEERING WITH AZURE DATA FACTORY
+# DATA ENGINEERING WITH AZURE DATA FACTORY & DATA FLOWS
 
 ## E) Data Engineering in Azure Data Factory
+
+We will create a simple Pipeline which leverages one DataFlow, connected to 5 input Datasets, generating one output Dataset. Here's the output of what we're building below:
+
+Datasets & Pipeline:
+![screenshot](screenshots/adf-pipeline.png)
+
+Let's build all these elements before we get into the Data Flow.
 
 ### E.1) Create a Data Factory:
 
@@ -288,7 +300,7 @@ We'll go thru the following:
         Version:    V2
         Git:        Unchecked for this quick workshop, but recommended otherwise
 
-Once created, you can jump to the Data Factory studio via https://adf.azure.com/
+Once created, you can jump to the Data Factory studio via [https://adf.azure.com/](https://adf.azure.com/)
 
 ### E.2) Setting up 'Connections' in the Data Factory
 
@@ -342,6 +354,11 @@ Click on 'Data flow debug' on the top menu bar to kick off the debug runtime (it
 
 ### E.6) Configuring the Data Flow
 
+Here's the full output of the Data Flow we are about to build as reference. Some of the steps are using the default generated names and you should end up with the same names if you follow the instructions in the same order.
+
+Data Flow:
+![screenshot](screenshots/adf-dataflow.png)
+
 Add 3 Data Sources by clicking the 'Add Source' box in the canvas, and select 'h_time_series_1' from the drop down. Rename it as well propely like 'htimeseries1' (note: no space or _ allowed for the names). Repeat the process for 'h_time_series_2' and 'h_time_series_3' datasets to set them as data sources for the Data Flow.
 
 'htimeseries1':
@@ -384,7 +401,7 @@ Now, let's clean up the output by removing columns and renaming them.
 
 Add a 'sink' at the end of 'Join4' to store the final dataset:
 - name it 'timeseriestraining'
-- sink dataset: click on 'New', select 'Azure Blob Storage', then 'DelimitedText', name it 'timeseriestraining' and select 'aml_data_lake' in the service dropdown and browse to your datasets/ folder. Add 'timeseriestraining' in the last box of the path.
+- sink dataset: click on 'New', select 'Azure Blob Storage', then 'DelimitedText', name it 'time_series_training' and select 'aml_data_lake' in the service dropdown and browse to your 'datasets' folder, select it. Then add '/time-series-training' in the second box of the path to automatically create a folder as it doesn't exist yet.
 - check 'first row as header'
 - set import schema to 'None'
 - click 'Create'
@@ -396,7 +413,7 @@ While it's running, you can click on the 'glasses' icon and see the details of t
 
 ### E.7) Create a DataSet in Azure ML Pointing to the target folder destination of E.6
 
-Go to https://ml.azure.com to get back into your Azure ML Workspace. Create a new DataSet 'from datastore':
+Go to [https://ml.azure.com](https://ml.azure.com) to get back into your Azure ML Workspace. Create a new DataSet 'from datastore':
 
                 Name:           d_use_case_1_adf
                 Type:           Tabular
