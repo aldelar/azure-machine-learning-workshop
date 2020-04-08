@@ -275,3 +275,119 @@ D) Data Engineering in Azure ML Notebooks
     https://github.com/aldelar/azure-machine-learning-workshop/use-case-1/use-case-1/data-prep-pipeline.ipynb
 
     The notebook final step geneates a DataSet named 'use-case-1-d' for the daily level combined features. This is the data set to leverage to run AutoML for time series as done in C. Consider using Deep Learning with a GPU cluster.
+
+# PULLING DATA INTO THE DATA LAKE & DATA ENGINEERING WITH AZURE DATA FACTORY
+
+E) Data Engineering in Azure Data Factory
+
+E.1) Create a Data Factory:
+
+        Name:       prx-adf
+        Version:    V2
+        Git:        Unchecked for this quick workshop, but recommended otherwise
+
+Once created, you can jump to the Data Factory studio via https://adf.azure.com/
+
+E.2) Setting up 'Connections' in the Data Factory
+
+Click on 'Connections' at the bottom left of the screen
+Create a '+ New' connection
+Select 'Azure Blob Storage' (this is the storage type that comes default with AML, we'll connect to it to source the files you uploaded in the sections above)
+
+    Name:           prx_data_lake
+
+Pick your subscription from the subscription dropdown, then pick the 'Storage account name' from the list below that starts with 'prxmlws#########' where ######## is a series of digits auto created by AML. 'prx' is your unique prefix defined early on.
+
+Click 'Test Connection' to make sure it works, and then 'Create'
+
+E.3) Setting up DataSets
+
+Click on '...' next to Datasets on the left menu pane, and select 'New Dataset'.
+Select 'Azure Blob Storage' from the source storage option pane (you can search for it), click 'Continue' and select 'DelimitedText' as the format.
+
+    Name:                   h_time_series_1
+    Linked service:         aml_data_lake
+    First row as header:    checked
+
+Then browse to find your file that represents the first hourly time series (aka 'time series 1').
+Click OK to create the dataset.
+
+Once created, it should show up on a new tab, click on the 'Connection' subtab, and then 'Preview Data' to make sure you configured it correctly.
+
+NOTE: Click on 'Validate all' to make sure there's no error and then 'Publish all' to save the new objects.
+
+E.4) Repeat E.3 for the following datasets: h_time_series_2, h_time_series_3, d_time_series_1, d_time_series_2
+
+The easiest way to do this is to leverage the 'Clone' feature.
+
+Click on the '...' next to your dataset name in the left pane menu, and click 'Clone'.
+
+Once cloned (it should appear in a new tab), update it's name to be 'h_time_series_2', then click on 'Connection' and 'Browse' to select the file that represents the second hourly time series. Once selected, click on 'Schema' and 'Import Schema', select 'From Connection/Store' to bring in the new columns.
+
+Check that everything is ok with 'Preview Data'.
+
+Repeat the cloning process 3 times to create h_time_series_3, d_time_series_1, and d_time_series_2
+
+E.5) Create a new 'Pipeline by clicking the '...' in the Pipelines menu item in the left pane
+
+Rename it 'Time Series Data Prep'
+Open up the 'Move & transform' section and drag and drop a 'Data flow' activity.
+Select 'create new dataflow' and then select 'Mapping DataFlow'
+
+A new DataFlow canvas opens up. Rename it to 'Time Series Data Flow'
+
+Click on 'Data flow debug' on the top menu bar to kick off the debug runtime (it takes a few minutes).
+
+E.6) Configuring the Data Flow
+
+Add 3 Data Sources by clicking the 'Add Source' box in the canvas, and select 'h_time_series_1' from the drop down. Rename it as well propely like 'htimeseries1' (note: no space or _ allowed for the names). Repeat the process for 'h_time_series_2' and 'h_time_series_3' datasets to set them as data sources for the Data Flow.
+
+'htimeseries1':
+Click on '+' nexy to the first source and select 'Pivot'
+Select 'MYDATE' for the 'Group By' parameter
+Select 'NODE_ID' for the Pivot Key
+Go to 'Pivoted Columns' and click in "Pivot Expression" and type 'min(MW)' in the editor in the righ pane that pops up. This pane allows you to build very complex transformations as needed. We'll just use it now to create some basic statistical aggregates from the hourly data by aggregating at the date level. Click "Save and Finish", and then name this 'min_' in the box next to the expression we just entered to prefix the column name with 'min_'.
+Click on '+' to add a second aggregate expression: set it to 'max(MW)' and name the prefix 'max_'
+
+Click on 'Data Preview' and validate that you get a pivoted table with 4 columns, min/max aggregates by day for each NODE_ID type, you should get MYDATE,min_N1,min_S1,min_Z1,max_N1,max_S1,max_Z1 as columns.
+
+'htimeseries2':
+Repeat the pivot operations above for the 'htimeseries2' source. This time you should end up with 5 columns as NODE_ID has only two distinct values.
+
+'htimeseries3':
+Add an 'Aggregate' step for this time series as there's no column to pivot.
+Group by 'DATE'
+Aggregates:
+- type in min_CLOAD in the first drop down to create a new column
+- type in min(CLOAD) in the expression box next to it to define the aggregate
+- click on '+' and select 'add column' to add a new column
+- type in max_CLOAD in the first drop down to create a new column
+- type in max(CLOAD) in the expression box next to it to define the aggregate
+Click on 'Preview Data' to validate the aggregation for this input.
+
+'dtimeseries1' and 'dtimeseries2':
+- add them as new sources by selecting the corresponding datasets and renaming them properly
+- click on '+' next to 'dtimeseries1' and add a 'join'
+Select the 'Right stream' to be 'dtimeseries2'
+Under Join conditions, select RDATE on both sides.
+Click 'Preview data' to validate that the join works properly.
+
+Repeat the operation:
+- Join 'Pivot1' with 'Pivot2' on 'MYDATE'
+- Join 'Join2' and 'Aggregate1' on 'Pivot1@MYDATE' and 'DATE'
+- Join 'Join3' and 'Join1' on 'Pivot1@MYDATE' and 'dtimeseries1@RDATE'
+Click on 'Data Preview' for 'Join4' which should bring all these data sets together
+
+Now, let's clean up the output by removing columns and renaming them.
+
+Add a 'sink' at the end of 'Join4' to store the final dataset:
+- name it 'timeseriestraining'
+- sink dataset: click on 'New', select 'Azure Blob Storage', then 'DelimitedText', name it 'timeseriestraining' and select 'aml_data_lake' in the service dropdown and browse to your datasets/ folder. Add 'timeseriestraining' in the last box of the path.
+- check 'first row as header'
+- set import schema to 'None'
+- click 'Create'
+
+Now click on 'Validate all', and then 'Publish all'.
+
+Go back to the pipeline, and click 'Debug' to run everything and generate the training file.
+While it's running, you can click on the 'glasses' icon and see the details of the run, step by step with statistics about each step.
