@@ -5,7 +5,6 @@
 
 .create table congestion (['date']: datetime, he: int, node_number: int, cong: real)
 
-// https://agdmlws4361999107.blob.core.windows.net/azureml-blobstore-4694fcef-fee5-4555-8a6c-dc3f09f0ad61/datasets/time-series-clustering/?st=2020-04-17T17%3A04%3A26Z&se=2020-06-18T17%3A04%3A00Z&sp=rwl&sv=2018-03-28&sr=c&sig=SLHAJblcuQ4YFvXe%2Fv1ADZsc8kKQsHHDwHEt4T6it7o%3D
 .ingest into table congestion (
     h'__blob_SharedAccessSignature_URI_for_congestion_file_1_',
     h'__blob_SharedAccessSignature_URI_for_congestion_file_2_',
