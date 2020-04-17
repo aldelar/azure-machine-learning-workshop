@@ -1,0 +1,251 @@
+//
+// Loading time series
+//
+.drop table congestion
+
+.create table congestion (['date']: datetime, he: int, node_number: int, cong: real)
+
+// https://agdmlws4361999107.blob.core.windows.net/azureml-blobstore-4694fcef-fee5-4555-8a6c-dc3f09f0ad61/datasets/time-series-clustering/?st=2020-04-17T17%3A04%3A26Z&se=2020-06-18T17%3A04%3A00Z&sp=rwl&sv=2018-03-28&sr=c&sig=SLHAJblcuQ4YFvXe%2Fv1ADZsc8kKQsHHDwHEt4T6it7o%3D
+.ingest into table congestion (
+    h'__blob_SharedAccessSignature_URI_for_congestion_file_1_',
+    h'__blob_SharedAccessSignature_URI_for_congestion_file_2_',
+    h'__blob_SharedAccessSignature_URI_for_congestion_file_3_',
+    h'__blob_SharedAccessSignature_URI_for_congestion_file_4_',
+    h'__blob_SharedAccessSignature_URI_for_congestion_file_5_',
+    h'__blob_SharedAccessSignature_URI_for_congestion_file_6_',
+    h'__blob_SharedAccessSignature_URI_for_congestion_file_7_'
+    ) with (format='csv', ignoreFirstRecord=true)
+
+// Checking time series data
+congestion
+| count
+
+congestion
+| take 10
+
+// check how many distinct nodes and days 
+congestion
+| summarize rows= count(), nodes=dcount(node_number), days=dcount(['date'])
+
+// quick check on ranges
+congestion
+| summarize min(['date']), max(['date']), min(he), max(he), min(cong), max(cong), min(node_number), max(node_number)
+
+// use of 'project' to reorder columns or apply transformations
+// ex: generate datetime (to be used later in join with geo location)
+congestion
+| project ['datetime'] = datetime_add('hour',he-1,['date']), node_number, cong
+| take 10
+
+//
+// Load node_id geo location data
+//
+.drop table geo
+
+.create table geo (node_number: int, Latitude: real, Longitude: real)
+
+.ingest into table geo (h'__blob_SharedAccessSignature_URI_for_geo_file_') with (format='csv', ignoreFirstRecord=true)
+
+// check geo location data
+geo
+| count
+
+geo
+| take 5
+
+geo
+| summarize min(node_number), max(node_number), min(Latitude), max(Latitude), min(Longitude), max(Longitude)
+
+// see nodes on map
+geo
+| project Longitude, Latitude, node_number, 1
+| render piechart with (kind=map)
+
+// test join
+geo | join hint.strategy = broadcast congestion on node_number
+| project ['datetime'] = datetime_add('hour',he-1,['date']), node_number, Latitude, Longitude, cong
+| take 10
+
+//
+// JOIN time series with geo data into a new table
+//
+.set-or-replace congestion_geo with(recreate_schema=true) <|
+    geo | join hint.strategy = broadcast congestion on node_number
+    | project ['datetime'] = datetime_add('hour',he-1,['date']), node_number, Latitude, Longitude, cong
+
+// check joined time series
+congestion_geo
+| count 
+
+congestion_geo
+| take 10
+
+congestion_geo
+| summarize min(['datetime']), max(['datetime']), min(node_number), max(node_number), min(Latitude), max(Latitude), min(Longitude), max(Longitude), min(cong), max(cong)
+
+// render some series
+congestion_geo
+| where node_number < 75
+| where ['datetime'] < datetime(2017-01-07)
+| project ['datetime'], node=strcat("node #",node_number), cong
+| render timechart
+
+//
+// ADX time series analysis
+//
+
+// make-series // NOTE: operator 'let' enables to define local paramters for queries
+let interval = 1h;
+let stime = datetime(2017-01-01);
+let etime = datetime(2017-01-31);
+congestion_geo
+| where node_number < 30
+| make-series cong=max(cong) on ['datetime'] in range(stime,etime,interval) by node_number
+
+
+// let's materialize the series into a table for later use
+.set-or-replace congestion_geo_ts with(recreate_schema=true) <|
+congestion_geo
+| make-series cong=max(cong) on ['datetime'] in range(datetime(2017-01-01),datetime(2019-09-16),1h) by node_number
+
+congestion_geo_ts
+| count ;
+
+congestion_geo_ts
+| take 5
+
+//
+// output stats for each node time series
+//
+congestion_geo_ts
+| project node_number, series_stats(cong)
+| take 10
+
+//
+// detect periods for each series
+//
+congestion_geo
+| where node_number < 30
+| make-series cong=max(cong) on ['datetime'] in range(datetime(2017-01-01),datetime(2017-03-31),1h) by node_number
+| project node_number, series_periods_detect(cong, 1, 1440, 2)
+
+// plot a few series to check the detected periods: series that MATCH
+congestion_geo
+| where node_number in (22,4)
+| where ['datetime'] < datetime(2017-03-31)
+| project ['datetime'], node=strcat("node #",node_number), cong
+| render timechart
+
+// plot a few series to check the detected periods: series that DO NOT MATCH
+congestion_geo
+| where node_number in (16,27)
+| where ['datetime'] < datetime(2017-03-31)
+| project ['datetime'], node=strcat("node #",node_number), cong
+| render timechart
+
+//
+// output stats + detect periods for each series + project
+//
+let interval = 1h;
+let stime = datetime(2017-01-01);
+let etime = datetime(2017-03-31);
+congestion_geo
+| where node_number < 30
+| make-series avg_cong=avg(cong) on ['datetime'] in range(stime,etime,interval) by node_number
+| project node_number, series_periods_detect(avg_cong, 1, 1440, 2), series_stats(avg_cong)
+| project node_number, p0=series_periods_detect_avg_cong_periods[0], p1=series_periods_detect_avg_cong_periods[1], p0_s=series_periods_detect_avg_cong_scores[0], p1_s=series_periods_detect_avg_cong_scores[1], stdev=series_stats_avg_cong_stdev, var=series_stats_avg_cong_variance
+
+//
+// output stats + detect periods for each series + project + autocluster
+//
+let interval = 1h;
+let stime = datetime(2017-01-01);
+let etime = datetime(2017-03-31);
+congestion_geo
+| where node_number < 300
+| make-series avg_cong=avg(cong) on ['datetime'] in range(stime,etime,interval) by node_number
+| project node_number, series_periods_detect(avg_cong, 1, 1440, 2), series_stats(avg_cong)
+| project p0=series_periods_detect_avg_cong_periods[0], p1=series_periods_detect_avg_cong_periods[1], p0_s=series_periods_detect_avg_cong_scores[0], p1_s=series_periods_detect_avg_cong_scores[1], stdev=series_stats_avg_cong_stdev, var=series_stats_avg_cong_variance
+| evaluate autocluster(0.2)
+
+// retrieving nodes to test results
+let interval = 1h;
+let stime = datetime(2017-01-01);
+let etime = datetime(2017-03-31);
+congestion_geo
+| where node_number < 300
+| make-series avg_cong=avg(cong) on ['datetime'] in range(stime,etime,interval) by node_number
+| project node_number, series_periods_detect(avg_cong, 1, 1440, 2), series_stats(avg_cong)
+| project node_number, p0=series_periods_detect_avg_cong_periods[0], p1=series_periods_detect_avg_cong_periods[1], p0_s=series_periods_detect_avg_cong_scores[0], p1_s=series_periods_detect_avg_cong_scores[1], stdev=series_stats_avg_cong_stdev, var=series_stats_avg_cong_variance
+| where p0==24 and p1==288
+| project node_number, p0, p1
+
+//
+//Create a custom UDF to run K-Means clustering using Python plugin
+//
+.create-or-alter function with (folder = "Python") kmeans_udf(tbl:(*),k:int,features:dynamic,cluster_col:string) {
+    let kwargs = pack('k', k, 'features', features, 'cluster_col', cluster_col);
+    let code =
+        '\n'
+        'from sklearn.cluster import KMeans\n'
+        '\n'
+        'k = kargs["k"]\n'
+        'features = kargs["features"]\n'
+        'cluster_col = kargs["cluster_col"]\n'
+        '\n'
+        'km = KMeans(n_clusters=k)\n'
+        'df1 = df[features]\n'
+        'km.fit(df1)\n'
+        'result = df\n'
+        'result[cluster_col] = km.labels_\n';
+    tbl
+    | evaluate python(typeof(*), code, kwargs)
+}
+
+// Invoke the custom UDF to do k-mean clustering based on periods + stats features of each series
+.set-or-replace congestion_geo_clusters with(recreate_schema=true) <|
+congestion_geo
+//| where node_number < 300
+| make-series avg_cong=avg(cong) on ['datetime'] in range(datetime(2017-01-01),datetime(2017-03-31),1h) by node_number
+| project node_number, series_periods_detect(avg_cong, 1, 1440, 2), series_stats(avg_cong)
+| project node_number, p0=series_periods_detect_avg_cong_periods[0], p1=series_periods_detect_avg_cong_periods[1], p0_s=series_periods_detect_avg_cong_scores[0], p1_s=series_periods_detect_avg_cong_scores[1], stdev=series_stats_avg_cong_stdev, var=series_stats_avg_cong_variance, min=series_stats_avg_cong_min, max=series_stats_avg_cong_max
+| extend cluster_id=double(null)
+| project-reorder cluster_id
+| invoke kmeans_udf(6,pack_array('p0','p1','p0_s','p1_s','min','max'),"cluster_id")
+
+congestion_geo_clusters
+| count
+
+congestion_geo_clusters
+| take 5
+
+congestion_geo_clusters
+| summarize node_count=count(), nodes = make_list(node_number) by cluster_id
+
+congestion_geo_clusters
+| join geo on node_number
+// filter 50 km around Los Angeles
+//| where geo_distance_2points(Longitude,Latitude,-118.24532,34.05349) < 50000
+// filter 50 km around San Diego
+| where geo_distance_2points(Longitude,Latitude,-117.1625,32.715) < 50000
+| project Longitude, Latitude, cluster_id, cluster_id*1
+| render piechart with (kind=map)
+
+
+
+
+//
+// Example on how to export data, you can specify a max size to generate multiple files
+// here, exporting 'congestion' into files of less than 100 MB each
+//
+.export
+  // async compressed
+  to csv (
+    h@"__blob_SharedAccessSignature_URI_for_CONTAINER_LEVEL_"
+  ) with (
+    sizeLimit=100000000,
+    namePrefix='congestion_',
+    includeHeaders=all,
+    encoding=UTF8NoBOM
+  )
+<| congestion | project format_datetime(['date'],"yyyy-MM-dd"), he, node_number, cong | order by ['date'] asc, he asc
