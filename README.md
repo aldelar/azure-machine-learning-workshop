@@ -535,7 +535,9 @@ Then right click on one of the files to generate a SAS token:
 
 ![screenshot](screenshots/ase-get-sas.png)
 
-On the next screen, make sure you select 'generate container level...' to get a token that will work for all files in this container. You can keep the rest of the defaults which enables only ready/list on the container, and change the expiration date accordingly (a week, etc. depending on how long you want the token to be valid).
+On the next screen, make sure you select 'generate container level shared access signature URI' to get a token that will work for all files in this container. You can keep the rest of the defaults which enables only ready/list on the container, and change the expiration date accordingly (a week, etc. depending on how long you want the token to be valid).
+
+![screenshot](screenshots/ase-generate-sas.png)
 
 The token you will get will be a full URI with access keys in it. It's on the next screen in the 'URI' box, copy that.
 
