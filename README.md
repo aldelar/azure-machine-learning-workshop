@@ -442,3 +442,128 @@ Click 'Finish' to kick off the Experiment.
 Feel free to create a second AutoML run against the same dataset but with 'Deep Learning' enabled. You can, and probably SHOULD to keep things together, reuse the same experiment when you create the second run using Deep Learning. You are afterall trying to solve the same problem but just with a different approach. If you have two training clusters, you could send each job against a different cluster to parallelize this accordingly. If sent to the same clusters, the jobs of each experiment will compete for compute and stagger as they come.
 
 This concludes this chapter around Use Case 1 to take care of data prep in a full code environment with Notebooks and Azure ML Pipelines, or in a full No Code environment with Azure Data Factory and Azure DataFlow.
+
+## F) Time Series Clustering with Azure Data Explorer
+
+Use Case #2: time series clustering
+
+In this use case, we're trying to see how to easily cluster about 700 time series of hourly data over a period of 45 months.
+
+We will leverage Azure Data Explorer (aka ADX), which is a fast, fully managed data analytics service for real-time analysis on large volumes of data streaming from applications, websites, IoT devices, and more.
+
+### F.1) Create an Azure Data Explorer Service
+
+Search for 'Data Explorer' in your Azure Portal 'new resource' panel, and use the following settings (reminder: prx is your own 'prefix'):
+
+                cluster name:           prxadx
+                region:                 same region than your other resources
+                resource group:         same as previously used
+                compute specifications: Dev(No SLA)
+
+Keep all other settings as default and click 'Create'.
+
+### F.2) Enable Python and R on the cluster
+
+Once the service is created, click on it in your resource group and click on the 'configuration' item in the left pane, select Python and R and 'Save':
+
+![screenshot](screenshots/adx-configuration.png)
+
+### F.3) Create a Database
+
+Click on '+ Create Database' in your Azure ADX cluster resource.
+
+Set the parameters the following way:
+
+![screenshot](screenshots/adx-create-db.png)
+
+The retention period indicates when data that gets loaded today will be automatically deleted (here set to one year from today), and the cache period indicates which part of the data is cached in the local nodes (on SSD disk and/or memory). You can choose to have the entire data set cached if needed, as long as your nodes have enough SSD cache. They are a lot of node types that can accomodate different scenarios.
+
+### F.4) Launch the ADX Web UI Studio
+
+Click on 'Overview' in your ADX resource, and copy the URI.
+
+Paste the URI into a new browser window, it should look like this:
+
+https://your_adx_cluster_name.your_region.kusto.windows.net
+
+You also have the option to work from a Desktop Client, which can be downlaoded here:
+
+[Kusto Explorer Tool](https://docs.microsoft.com/en-us/azure/data-explorer/kusto/tools/kusto-explorer)
+
+The rest of this workshop assumes working from the Web UI client.
+
+### F.5) Add the Samples data cluster to your Studio
+
+Click on 'Add Cluster' and type 'help' in the URI box (only put 'help', nothing else, it's a handy shortcut that gets interpreted), then click 'Add', and you will have a new cluster attached to your configuration with some sample datasets.
+
+These datasets are used in some of the documentation examples to be found here:
+
+[Azure Data Explorer Documentation](https://docs.microsoft.com/en-us/azure/data-explorer/)
+
+### F.6) Open up a new panel to run the sample example .kql file
+
+Download this .kql (Kusto Query Language, Kusto being the code name for ADX) file: [time-series-clustering.kql](use-case-2/kql/time-series-clustering.kql)
+
+Now in the Studio Web UI, on the top right side, click on the 'File' menu icon and 'Open' to select this file and open it in the Studio.
+
+If you do not see your cluster already registereed on the left side panel, click on 'Add Cluster' and enter the full URI of your cluster (See section F.4 to find the URI).
+
+Make sure you click on the database created in step F.3 which should be under your cluster to set the 'context' of the .kql file you just loaded into the Web UI client.
+
+At this point you are getting ready to follow the script and its instructions.
+
+### F.7) Upload datasets to a storage account and set SAS tokens into the scripts
+
+Here are the preparation steps needed to load data from an Azure Data Lake.
+
+Assuming we're re-using the blob storage account that was created at the beginning of this workshop, navigate to it and upload all the .csv. files which are present under this folder:
+
+[use-case-2-files](datasets/time-series-clustering/)
+
+Download them locally, then upload them into a container in your blob storage account.
+
+We'll then need to obtain SAS token to replace the different parts of the script which are currently set to things like:
+
+__blob_SharedAccessSignature_URI_for_congestion_file_1_
+__blob_SharedAccessSignature_URI_for_congestion_file_2_
+...
+__blob_SharedAccessSignature_URI_for_geo_file_
+
+We'll need to obtain a SAS URI for each of these files. Do do this, once uploaded, the easiest is to use [Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/), login to your Azure account, then navigate to your blob storage account and container with all these files.
+
+Then right click on one of the files to generate a SAS token:
+
+![screenshot](screenshots/ase-get-sas.png)
+
+On the next screen, make sure you select 'generate container level shared access signature URI' to get a token that will work for all files in this container. You can keep the rest of the defaults which enables only ready/list on the container, and change the expiration date accordingly (a week, etc. depending on how long you want the token to be valid).
+
+![screenshot](screenshots/ase-generate-sas.png)
+
+The token you will get will be a full URI with access keys in it. It's on the next screen in the 'URI' box, copy that.
+
+You will be able to update the File Name which is included somewhere in the middle of it, to point to any file name in this container.
+
+Go to the .kql scrip, and replace the URI items with the URI you got, and then update the file it references to be the correct file in each location.
+
+You will see that the 'congestion' data has been split into 7 files, copy the URI 7 times, then replace the file name in the middle of it to point to each file.
+
+Do the same thing for the 'geo' file, replacing the file name in the middle of the URI with 'geo.csv'.
+
+At this point you should be ready to go over each step of the .kql file and proceed with the execution.
+
+Example of URI:
+
+https://_some_blob_ref_.blob.core.windows.net/azureml-blobstore-xyzxyzxyz/datasets/time-series-clustering/congestion_1.csv?(some-params-representing-the-key-do-not-change)
+
+Copy this URI everywhere there needs to be one, and replace 'congestion_1.csv' with the different file names as needed.
+
+Since we generated a container level SAS, the same URI pattern can be applied to any file in this container instead of generating a SAS token for each file individually.
+
+
+At the end of the script, you should be able to visualize clusters on a map based on a k-means clustering from features generated via ADX:
+- basic statistical information
+- auto detected signal periods
+
+autocluster() is also used as another built-in approach to cluster time series.
+
+![screenshot](screenshots/adx-clusters.png)
