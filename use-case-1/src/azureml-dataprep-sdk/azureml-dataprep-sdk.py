@@ -25,7 +25,6 @@ d_ts_2_dr = args.d_ts_2
 # azureml-dataprep-sdk.py
 # =======================
 
-# source files
 h_ts_1_dflow = dprep.auto_read_file(h_ts_1_dr)
 h_ts_2_dflow = dprep.auto_read_file(h_ts_2_dr)
 h_ts_3_dflow = dprep.auto_read_file(h_ts_3_dr)
@@ -49,11 +48,12 @@ def ts_merge_date_hour_to_datetime(dflow, date_column_name, hour_column_name):
         example_data = [({date_column_name: '1/1/2012', hour_column_name: '1'},    '01/01/2012 01:00'),
                         ({date_column_name: '10/10/2012', hour_column_name: '15'}, '10/10/2012 15:00'),
                         ({date_column_name: '1/17/2012', hour_column_name: '12'},  '01/17/2012 12:00')]
-        ).drop_columns([date_column_name,hour_column_name])
+        ).drop_columns([hour_column_name])
     # update data type
     builder = dflow.builders.set_column_types()
     builder.learn()
-    builder.conversion_candidates['DATETIME'] = (dprep.FieldType.DATE, ['%d/%m/%Y %H:%M'])
+    builder.conversion_candidates[date_column_name] = (dprep.FieldType.DATE, ['%m/%d/%Y'])
+    builder.conversion_candidates['DATETIME'] = (dprep.FieldType.DATE, ['%m/%d/%Y %H:%M'])
     return builder.to_dataflow()
 
 # generate all DATETIME columns with proper data type
@@ -67,11 +67,12 @@ h_ts_dflow = dprep.Dataflow.join(
                         h_ts_2_pivot_dt_dflow,
                         join_key_pairs=[('DATETIME', 'DATETIME')],
                         left_column_prefix='h1_',right_column_prefix='h2_'
-                       ).drop_columns(['h2_DATETIME']).rename_columns({'h1_DATETIME':'DATETIME'}),
+                       ).drop_columns(['h2_MYDATE','h2_DATETIME']).rename_columns({'h1_MYDATE':'MYDATE','h1_DATETIME':'DATETIME'}),
     h_ts_3_dt_dflow,
     join_key_pairs=[('DATETIME', 'DATETIME')],
     left_column_prefix='',
-    right_column_prefix='h3_').drop_columns(['h3_DATETIME'])
+    right_column_prefix='h3_'
+).drop_columns(['h3_DATE','h3_DATETIME'])
 
 # JOINING DATA SET d_ts_dflow=join(d1,d2)
 d_ts_dflow = dprep.Dataflow.join(
@@ -92,7 +93,7 @@ def generate_summary_column(column_name,column_suffix,summary_function):
 def generate_summary_columns(dflow):
     summary_columns = []
     for key in h_ts_dflow.get_profile().columns.keys():
-        if key != 'DATETIME':
+        if key != 'MYDATE' and key != 'DATETIME':
             summary_columns.append(generate_summary_column(key,'MAX',dprep.SummaryFunction.MAX))
             summary_columns.append(generate_summary_column(key,'MIN',dprep.SummaryFunction.MIN))
             summary_columns.append(generate_summary_column(key,'MEAN',dprep.SummaryFunction.MEAN))
@@ -102,13 +103,13 @@ def generate_summary_columns(dflow):
 # summarize h_ts_dflow to daily
 h_ts_summarized_dflow = h_ts_dflow.summarize(
     summary_columns=generate_summary_columns(h_ts_dflow),
-    group_by_columns=['DATETIME'])
+    group_by_columns=['MYDATE'])
 
 # join h and d series
 training_dflow = dprep.Dataflow.join(
     h_ts_summarized_dflow,
     d_ts_dflow,
-    join_key_pairs=[('DATETIME', 'RDATE')],
+    join_key_pairs=[('MYDATE', 'RDATE')],
     left_column_prefix='',
     right_column_prefix='r_').drop_columns(['r_RDATE']).rename_columns({'r_X1':'X1','r_X2':'X2'})
 
@@ -116,5 +117,5 @@ training_dflow = dprep.Dataflow.join(
 # EOF azureml-dataprep-sdk.py
 # ===========================
 
-#
+# writing output
 training_dflow.write_to_csv(directory_path=args.output).run_local()
