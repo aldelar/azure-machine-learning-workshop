@@ -15,7 +15,7 @@ def gen_date(d,h):
     return d + dt.timedelta(hours=int(h))
 
 # Script Parameters
-parser = argparse.ArgumentParser("pivot")
+parser = argparse.ArgumentParser("featurize")
 parser.add_argument("--date_column", type=str, help="date_column")
 parser.add_argument("--hour_column", type=str, help="hour_column")
 parser.add_argument("--datetime_column_name", type=str, help="datetime_column_name")
