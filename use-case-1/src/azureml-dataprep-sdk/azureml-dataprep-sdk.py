@@ -105,13 +105,65 @@ h_ts_summarized_dflow = h_ts_dflow.summarize(
     summary_columns=generate_summary_columns(h_ts_dflow),
     group_by_columns=['MYDATE'])
 
+# FEATURIZATION of X2
+
+# X2: replace X2 values with quantile values for < 5%, > 95%
+X2_column_profile = d_ts_dflow.get_profile().columns['X2']
+X2_quantile_005 = X2_column_profile.quantiles[0.05]
+X2_quantile_095 = X2_column_profile.quantiles[0.95]
+# mapping function to update the dataflow, this gets executed in parallel for each dataflow partition
+def update_with_quantiles(df, index):
+    df.loc[df['X2'] < X2_quantile_005, 'X2'] = X2_quantile_005
+    df.loc[df['X2'] > X2_quantile_095, 'X2'] = X2_quantile_095
+    return df
+d_ts_features_dflow = d_ts_dflow.map_partition(fn=update_with_quantiles)
+
+# X1: create an 'X1_TEMP' feature
+# we can use custom script to code any type of logic to generate new columns, but this is slower than the 'map_partition
+# above which can run in parallel when multiple partitions are applied
+d_ts_features_dflow = d_ts_features_dflow.new_script_column(new_column_name='X1_TEMP', insert_after='X1', script="""
+def newvalue(row):
+    value = 'MEDIUM'
+    if row['X1'] > 80:
+        value = 'HOT'
+    if row['X1'] < 60:
+        value = 'COLD'
+    return value
+""")
+
+# X1: One Hot Encoding of 'X1_TEMP'
+d_ts_features_dflow = d_ts_features_dflow.one_hot_encode(source_column='X1_TEMP')
+
+# X2: mapping function to update the dataflow with Lags
+def update_X2_with_lags(df, index):
+    df['X2_lag_1'] = df['X2'].shift(-1)
+    df['X2_lag_7'] = df['X2'].shift(-7)
+    df['X2_rolling_7'] = df['X2'].rolling(7).mean()
+    return df
+d_ts_features_dflow = d_ts_features_dflow.map_partition(fn=update_X2_with_lags)
+
+# X2 (and X2 lags): impute with MEAN: you can package as many imputation columns as needed in one builder
+impute_mean_X2 = dprep.ImputeColumnArguments(column_id='X2',impute_function=dprep.ReplaceValueFunction.MEAN)
+impute_mean_X2_lag_1 = dprep.ImputeColumnArguments(column_id='X2_lag_1',impute_function=dprep.ReplaceValueFunction.MEAN)
+impute_mean_X2_lag_7 = dprep.ImputeColumnArguments(column_id='X2_lag_7',impute_function=dprep.ReplaceValueFunction.MEAN)
+impute_mean_X2_rolling_7 = dprep.ImputeColumnArguments(column_id='X2_rolling_7',impute_function=dprep.ReplaceValueFunction.MEAN)
+impute_builder = d_ts_features_dflow.builders.impute_missing_values(
+    impute_columns=[impute_mean_X2,impute_mean_X2_lag_1,impute_mean_X2_lag_7,impute_mean_X2_rolling_7])
+impute_builder.learn()
+d_ts_features_dflow = impute_builder.to_dataflow()
+
 # join h and d series
 training_dflow = dprep.Dataflow.join(
     h_ts_summarized_dflow,
-    d_ts_dflow,
+    d_ts_features_dflow,
     join_key_pairs=[('MYDATE', 'RDATE')],
     left_column_prefix='',
-    right_column_prefix='r_').drop_columns(['r_RDATE']).rename_columns({'r_X1':'X1','r_X2':'X2'})
+    right_column_prefix='r_').drop_columns(['r_RDATE']).rename_columns(
+        {'r_X1':'X1','r_X2':'X2',
+         'r_X1_TEMP':'X1_TEMP',
+         'r_X1_TEMP_COLD':'X1_TEMP_COLD','r_X1_TEMP_MEDIUM':'X1_TEMP_MEDIUM','r_X1_TEMP_HOT':'X1_TEMP_HOT',
+         'r_X2_lag_1': 'X2_lag_1','r_X2_lag_7': 'X2_lag_7','r_X2_rolling_7': 'X2_rolling_7'
+        })
 
 # ===========================
 # EOF azureml-dataprep-sdk.py
