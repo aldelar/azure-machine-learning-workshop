@@ -567,3 +567,28 @@ At the end of the script, you should be able to visualize clusters on a map base
 autocluster() is also used as another built-in approach to cluster time series.
 
 ![screenshot](screenshots/adx-clusters.png)
+
+
+## G) Data Engineering with Azure ML Dataprep SDK and Azure Data Factory Data Flow
+
+### G.1) Azure ML Dataprep SDK
+
+Azure ML comes with a data engineering specific set of libraries called 'dataprep'. This SDK package enables to build Azure ML SDK Dataprep 'Data Flows' which can be piped with each other and support data clustering for large scale transformations.
+
+#### Useful resources
+
+[Python SDK Documentation](https://docs.microsoft.com/en-us/python/api/azureml-dataprep/?view=azure-ml-py)
+
+[Azure ML Dataprep Docs](https://github.com/microsoft/AMLDataPrepDocs)
+
+[Getting Started Python Notebook](https://github.com/microsoft/AMLDataPrepDocs/blob/master/tutorials/getting-started/getting-started.ipynb)
+
+[A lot of common data prep scenarios covered in dedicated Jupyter Notebooks](https://github.com/microsoft/AMLDataPrepDocs/tree/master/how-to-guides)
+
+#### Implementing Use Case 1 dataprep entirely using Azure ML SDK DataPrep
+
+This notebook covers in details a full data prep implementation of 'Use Case 1' using only the Azure ML SDK Dataprep. It builds a simple one step pipeline which executes a series of Dataprep [DataFlow](https://docs.microsoft.com/en-us/python/api/azureml-dataprep/azureml.dataprep.dataflow?view=azure-ml-py) transformations.
+
+Have a look at this Notebook and execute it in your Azure ML environment:
+
+[azureml-dataprep-sdk.ipynb](use-case-1/azureml-dataprep-sdk.ipynb)
