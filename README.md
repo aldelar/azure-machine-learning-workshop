@@ -589,6 +589,61 @@ Azure ML comes with a data engineering specific set of libraries called 'datapre
 
 This notebook covers in details a full data prep implementation of 'Use Case 1' using only the Azure ML SDK Dataprep. It builds a simple one step pipeline which executes a series of Dataprep [DataFlow](https://docs.microsoft.com/en-us/python/api/azureml-dataprep/azureml.dataprep.dataflow?view=azure-ml-py) transformations.
 
-Have a look at this Notebook and execute it in your Azure ML environment:
+Have a look at this Notebook and execute it in your Azure ML environment:  [azureml-dataprep-sdk.ipynb](use-case-1/azureml-dataprep-sdk.ipynb)
 
-[azureml-dataprep-sdk.ipynb](use-case-1/azureml-dataprep-sdk.ipynb)
+### G.2) Azure Data Factory DataFlow
+
+We will leverage the DataFlow built in section E) to expand it with a few steps to implement a few extra common data engineering scenarios.
+
+Scenarios:
+- lag features
+- categorization
+- one hot encoding
+- replacing missing values with defaults
+
+We will edit the original Data Flow to generate this updated version:
+![screenshot](screenshots/adf-dataflow-v2.png)
+
+
+Edit the Dataflow as found in E.6) and add the following steps:
+
+1) Add a step right after 'dtimeseries1' of type 'Derived column' and name it 'X1Temp'. We will generate the 'TEMP' categorization feature column
+
+        X1_TEMP                 iif(X1 < 60, 'COLD', iif(X1 > 80, 'HOT', 'MEDIUM'))
+
+2) Add a new 'Derived column' step right after 'X1Temp' and name it 'X1TempOneHotEncoding' where we will implement 3 columns to take care of the encoding:
+
+        X1_TEMP_COLD            iif(equals(X1_TEMP, 'COLD'),1,0)
+        X1_TEMP_MEDIUM          iif(equals(X1_TEMP, 'MEDIUM'),1,0)
+        X1_TEMP_HOT             iif(equals(X1_TEMP, 'HOT'),1,0)
+
+3) Add an 'Aggregate' step after 'dtimeseries2', call it 'X2Mean', to generate a new X2_mean column (no group by column), effectively just computing the mean value of X2 once for re-use in subsequent steps where needed to 'fill in' missing values
+
+        Group by:               none
+        Aggregates:             X2_mean         mean(X2)
+
+4) Add 'Join5' at the end of 'dtimeseries2' and join it to the new 'X2Mean'
+
+        Right Stream:           X2Mean
+        Join type:              Custom (cross)
+        Condition:              true()
+
+5) Add a 'Window' schema modifier step after 'Join5' and call it 'X2lags'. We will create 3 lagging features (lag of 1 period, lag of 7 periods, and a rolling average of past 5 periods). We will also setup a default value of 'X2_mean' for each missing value in the new lags columns
+
+        1.Over                  (left blank)
+        2.Sort                  RDATE                   Ascending
+        3.Range by              Unbounded
+        4.Window columns        X2_lag_1                iifNull(lag(X2,1),X2_mean)
+                                X2_lag_7                iifNull(lag(X2,7),X2_mean)
+                                X2_rolling_5            iifNull((lag(X2,1)+lag(X2,2)+lag(X2,3)+lag(X2,4)+lag(X2,5))/5,X2_mean)
+
+6) Add a 'Select' step after the 'X2lags' step to remove the X2_mean column from the dataset
+
+Keep all defaults and simply click on the 'delete' icon next to the X2_mean row in the mapping definition to remove that column from the dataset.
+
+7) Update 'Join1' to join from 'Select1' instead of the previously set 'dtimeseries2' stream
+
+#### Click on 'Data preview' in 'Join1' to validate the final results
+
+You should see something like this:
+![screenshot](screenshots/adf-dataflow-join1.png)
