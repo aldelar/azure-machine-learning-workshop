@@ -128,6 +128,15 @@ congestion_geo
 | make-series cong=max(cong) on ['datetime'] in range(datetime(2017-01-01),datetime(2017-03-31),1h) by node_number
 | project node_number, series_periods_detect(cong, 1, 1440, 2)
 
+//
+// detect periods for each series and anomalies
+//
+congestion_geo
+| where node_number < 30
+| make-series cong=max(cong) on ['datetime'] in range(datetime(2017-01-01),datetime(2017-03-31),1h) by node_number
+| extend anomalies = series_decompose_anomalies(cong,2.0)
+| project node_number, series_periods_detect(cong, 1, 1440, 2), anomalies
+
 // plot a few series to check the detected periods: series that MATCH
 congestion_geo
 | where node_number in (22,4)
@@ -248,3 +257,12 @@ congestion_geo_clusters
     encoding=UTF8NoBOM
   )
 <| congestion | project format_datetime(['date'],"yyyy-MM-dd"), he, node_number, cong | order by ['date'] asc, he asc
+
+
+
+
+// backup congestion table
+.set-or-replace congestion_backup with(recreate_schema=true) <| congestion
+
+// backup geo table
+.set-or-replace geo_backup with(recreate_schema=true) <| geo
